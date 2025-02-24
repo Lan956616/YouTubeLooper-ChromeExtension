@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Looper循環播放",
+  "version": "1.0",
+  "description": "一鍵自動重複播放YouTube影片，還可以設定循環播放次數、循環播放區間",
+  "icons": {
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch*"],
+      "js": ["content.js"],
+      "css": ["App.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["pictures/loop.png", "pictures/yellow-loop.png"],
+      "matches": ["https://www.youtube.com/*"]
+    }
+  ]
+}
