@@ -1,6 +1,6 @@
 ## YouTubeLooper_ChromeExtension
 <p align="center">
-    <img src="https://github.com/Lan956616/YouTubeLooper-ChromeExtension/blob/main/icons/icon128.png" width="128">
+    <img src="https://github.com/Lan956616/YouTubeLooper-ChromeExtension/blob/main/pictures/readmeBanner.jpg">
 </p>
 
 
