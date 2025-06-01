@@ -3,7 +3,7 @@
 </p>
 
 ## YouTubeLooper_ChromeExtension
-**YouTubeLooper** is a lightweight Chrome Extension that enables seamless video loop control with custom repeat counts and range playback settings — all with one click.
+**YouTubeLooper** is a lightweight Chrome Extension that lets you loop YouTube videos with custom repeat counts and playback ranges — all with a single click.
 
 ## Table of Contents
 - [Demo](#demo)
@@ -19,7 +19,7 @@
 ### One-click loop toggle
 <img src="https://github.com/Lan956616/YouTubeLooper-ChromeExtension/blob/main/gifs/openloop.gif" width="60%">  
 
-### Set loop count and custom range
+### Customize loop count and playback range
 <img src="https://github.com/Lan956616/YouTubeLooper-ChromeExtension/blob/main/gifs/settingloop.gif" width="60%">
 
 ### Auto light/dark mode adaptation
@@ -29,8 +29,8 @@
 ## Main Features
 [(back to top)](#table-of-contents)
 
-- Enable video loop with a single click  
-- Set repeat count for looping  
+- Loop videos with a single click
+- Customize the number of loop repetitions
 - Set custom start and end times for loop playback
 - Automatically adapts to YouTube's dark or light theme  
 - Responsive and intuitive UI designed for a smooth experience
@@ -42,7 +42,7 @@
 <a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/youtube-looper循環播放/ajbdeccchpbndogiggmhghlhfngbfbih?pli=1"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>
 
 ### Manual Installation
-1. [Download the ZIP](https://github.com/Lan956616/YouTubeLooper-ChromeExtension/archive/refs/heads/main.zip) extract it .Then, locate the `dist` folder.
+1. [Download the ZIP](https://github.com/Lan956616/YouTubeLooper-ChromeExtension/archive/refs/heads/main.zip) extract it. Locate the `dist` folder.
 2. Open **Google Chrome** and navigate to `chrome://extensions/`.
 3. Enable **Developer mode** (top-right corner).
 4. Click **Load unpacked** and select the `dist` folder.
