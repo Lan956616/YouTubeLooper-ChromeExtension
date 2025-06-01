@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-
 const formatTime = (time: number): string => {
   if (!time || Number.isNaN(time)) {
     return "0:00";
