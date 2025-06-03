@@ -35,6 +35,8 @@
 }
 .progress-dot.active {
   --dot-color: #ea333d;
+}
+.limited-progress-bar.active {
   --limited-progressBar-bg-color: #ea333d;
 }
 /* Global Reset */
