@@ -6,8 +6,10 @@ import LoopCountDisplay from "./loopCountDisplay/LoopCountDisplay";
 import LoopCountInput from "./loopCountInput/LoopCountInput";
 import LoopRangeInput from "./loopRangeInput/LoopRangeInput";
 import ProgressBar from "./progressBar/ProgressBar";
+import { useLoopControl } from "../hooks/useLoopControl";
 
 type AppProps = { videoId: string; duration: number; isDark: boolean };
+
 export type BaseState = {
   time: string;
   input: string;
@@ -18,11 +20,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const isJumpingRef = useRef<boolean>(false);
-  const [isLoop, setIsLoop] = useState<boolean>(false);
-  const [loopCount, setLoopCount] = useState<number>(0);
-  const [isLimitTimed, setIsLimitTimed] = useState<boolean>(false);
   const [isLimitZoned, setIsLimitZoned] = useState<boolean>(false);
-  const [maxLoopCount, setMaxLoopCount] = useState<number | string>(10);
   const [isDraggingLeft, setIsDraggingLeft] = useState<boolean>(false);
   const [isDraggingRight, setIsDraggingRight] = useState<boolean>(false);
   const [startState, setStartState] = useState<BaseState>({
@@ -35,28 +33,20 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     input: "0:00",
     position: 100,
   });
-
-  const maxLoopControl = {
-    prevMaxLoop: useRef<number>(10),
-    handleChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-      let inputValue = event.target.value;
-      setMaxLoopCount(inputValue);
-    },
-    onBlur: () => {
-      if (maxLoopCount === maxLoopControl.prevMaxLoop.current) {
-        return;
-      }
-      const parsedValue: number = Number(maxLoopCount);
-      let value: number =
-        isNaN(parsedValue) || maxLoopCount === ""
-          ? maxLoopControl.prevMaxLoop.current
-          : parsedValue;
-      value = Math.min(Math.max(value, 2), 100);
-      maxLoopControl.prevMaxLoop.current = value;
-      setMaxLoopCount(value);
-      setIsLimitTimed(true);
-    },
-  };
+  const {
+    isLoop,
+    setIsLoop,
+    loopCount,
+    setLoopCount,
+    isLimitTimed,
+    setIsLimitTimed,
+    maxLoopCount,
+    setMaxLoopCount,
+    handleMaxLoopChange,
+    handleMaxLoopBlur,
+    toggleLoop,
+    prevMaxLoop,
+  } = useLoopControl();
   const startTimeControl = {
     prevStartTime: useRef<number>(0),
     handleChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,16 +117,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
       }
     },
   };
-  //按下循環按鈕 開/關循環功能 開啟時清空已播次數
-  const handleButtonClick = () => {
-    setIsLoop((prev) => {
-      const newIsLoop = !prev;
-      if (newIsLoop) {
-        setLoopCount(0);
-      }
-      return newIsLoop;
-    });
-  };
+
   //1.組件初次渲染時 找到影片更新ref值
   useEffect(() => {
     videoRef.current = document.querySelector(".html5-video-container video");
@@ -164,7 +145,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     setLoopCount(0);
     //初始化限定播放次數
     setMaxLoopCount(10);
-    maxLoopControl.prevMaxLoop.current = 10;
+    prevMaxLoop.current = 10;
   }, [videoId]);
   //3.根據循環模式監聽影片播放
   useEffect(() => {
@@ -192,7 +173,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
       }
       const userStartTime = startTimeControl.prevStartTime.current;
       const userEndTime = endTimeControl.prevEndTime.current;
-      const userLimitTime = maxLoopControl.prevMaxLoop.current;
+      const userLimitTime = prevMaxLoop.current;
       const currentTime = videoRef.current.currentTime;
       //開啟 區間播放模式 或 限定次數＋區間模式 時
       if (isLimitZoned) {
@@ -282,7 +263,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
   ]);
   return (
     <div className="app-component">
-      <RepeatButton isLoop={isLoop} onClick={handleButtonClick} />
+      <RepeatButton isLoop={isLoop} onClick={toggleLoop} />
       <Container isDark={isDark}>
         <LoopCountDisplay loopCount={loopCount} />
         <LoopCountInput
@@ -291,8 +272,8 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
             setIsLimitTimed(!isLimitTimed);
           }}
           maxLoopCount={maxLoopCount}
-          onChange={maxLoopControl.handleChange}
-          onBlur={maxLoopControl.onBlur}
+          onChange={handleMaxLoopChange}
+          onBlur={handleMaxLoopBlur}
         />
         <LoopRangeInput
           isActive={isLimitZoned}
