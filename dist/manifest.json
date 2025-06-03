@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "YouTube Looper循環播放",
-  "version": "1.0",
-  "description": "一鍵自動重複播放YouTube影片，還可以設定循環播放次數、循環播放區間",
+  "version": "1.1",
+  "description": "Instantly loop YouTube videos with one click. Set custom loop counts and playback ranges effortlessly.",
   "icons": {
     "128": "icons/icon128.png"
   },
