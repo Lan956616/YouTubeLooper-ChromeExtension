@@ -1,47 +1,43 @@
-/*
-變數 淺色模式及各開關非active狀態時 
-*/
+/* Variables */
 :root {
   --container-bg-color: #f2f2f2;
   --container-font-color: black;
-  --inputStyle-focus-bg-color: #fffaeb;
-  --inputStyle-bg-color: white;
-  --inputStyle-font-color: black;
-  --timeZone-bg-color: #d4d3d3;
+  --input-focus-bg-color: #fffaeb;
+  --input-bg-color: white;
+  --input-font-color: black;
   --progressBar-bg-color: white;
   --limited-progressBar-bg-color: #4a4a4a;
   --dot-color: #d4d3d3;
-  --switch-color: #858484;
+  --toggle-color: #858484;
   --dot-left: 0%;
   --dot-translate-x: 0%;
   --repeat-button-bg-color: #ea333d;
 }
-/*
-變數 深色模式
-*/
+
 .darkmode {
   --container-bg-color: #282828;
   --container-font-color: white;
-  --inputStyle-focus-bg-color: #fae299;
-  --inputStyle-bg-color: #858484;
-  --inputStyle-font-color: white;
-  --timeZone-bg-color: #858484;
+  --input-focus-bg-color: #fae299;
+  --input-bg-color: #858484;
+  --input-font-color: white;
   --progressBar-bg-color: #4a4a4a;
   --limited-progressBar-bg-color: white;
   --dot-color: #858484;
 }
-/*
-變數 各開關active狀態時 
-*/
-.active {
-  --dot-color: #ea333d;
-  --limited-progressBar-bg-color: #ea333d;
-  --switch-color: #68ce67;
-  --dot-left: 100%;
-  --dot-translate-x: -100%;
+
+.repeat-button.active {
   --repeat-button-bg-color: #b3171f;
 }
-
+.toggle-container.active {
+  --toggle-color: #68ce67;
+  --dot-left: 100%;
+  --dot-translate-x: -100%;
+}
+.progress-dot.active {
+  --dot-color: #ea333d;
+  --limited-progressBar-bg-color: #ea333d;
+}
+/* Global Reset */
 .app-component *,
 .app-component *::before,
 .app-component *::after {
@@ -50,10 +46,7 @@
   list-style: none;
   box-sizing: border-box;
 }
-/*
-循環播放按鈕
-*/
-
+/* repeat button + container */
 .repeat-button {
   display: flex;
   margin-top: 10px;
@@ -65,20 +58,15 @@
   justify-content: center;
   align-items: center;
 }
-
 .repeat-button img {
   width: 30px;
   height: 30px;
 }
-
 .repeat-button:hover {
   filter: brightness(0.85);
   cursor: pointer;
 }
 
-/*
-循環播放控制區
-*/
 .container {
   display: none;
   margin-bottom: 1.5rem;
@@ -94,43 +82,43 @@
   flex-direction: column;
   justify-content: center;
 }
-/*各功能橫排*/
-.row {
+
+/* loop-count-display */
+.loop-count-display {
   width: 80%;
   align-self: center;
   margin-bottom: 1rem;
 }
-
-/*
-已播放次數區
-*/
-
-.time-count-zone span {
+.loop-count-display span {
   padding: 0px 3px;
   font-size: 16px;
 }
-
-/*
-限定播放次數+區間播放模式共用樣式
-*/
-.limited-zone {
+/* loop-range-input + loop-count-input*/
+.loop-range-input,
+.loop-count-input {
   display: flex;
+  width: 80%;
+  align-self: center;
+  margin-bottom: 1rem;
 }
-.limited-zone .setting-area {
+.setting-area {
   display: flex;
   align-items: center;
 }
-/*共用開關樣式*/
-.switch-container {
+/* toggle */
+.toggle-container {
   width: 70px;
   height: 30px;
-  background-color: var(--switch-color);
+  background-color: var(--toggle-color);
   border-radius: 30px;
   position: relative;
   margin-right: 1.5rem;
   box-shadow: 3px 3px 6px rgb(0 0 0 / 0.2);
 }
-.switch-toggle {
+.toggle-container:hover {
+  cursor: pointer;
+}
+.toggle {
   display: block;
   width: 30px;
   height: 30px;
@@ -142,8 +130,8 @@
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-/*共用輸入框樣式*/
-.inputStyle {
+/* input */
+.input {
   display: block;
   border: none;
   height: 30px;
@@ -153,29 +141,27 @@
   text-align: center;
   font-size: 1.6rem;
   border-radius: 10px;
-  background-color: var(--inputStyle-bg-color);
-  color: var(--inputStyle-font-color);
+  background-color: var(--input-bg-color);
+  color: var(--input-font-color);
 }
-.inputStyle:hover {
-  background-color: var(--inputStyle-focus-bg-color);
-}
-.inputStyle:focus {
-  outline: none;
-  background-color: var(--inputStyle-focus-bg-color);
-}
-
-.inputStyle.limited {
+.input.small {
   width: 60px;
 }
-
-/*取消數字輸入框側邊加減按鈕*/
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+.input:hover {
+  background-color: var(--input-focus-bg-color);
+}
+.input:focus {
+  outline: none;
+  background-color: var(--input-focus-bg-color);
+}
+/* Remove number input spinner buttons */
+.input[type="number"]::-webkit-inner-spin-button,
+.input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* 拖拉進度條樣式 */
+/* progress-bar */
 .progress-bar {
   width: 80%;
   height: 8px;
@@ -200,16 +186,6 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: translate(-50%, -4px);
   cursor: pointer;
 }
-.progress-dot:hover {
-  background-color: #ea333d;
-}
-.progress-dot:hover .time-display {
-  background-color: #ea333d;
-}
-.progress-dot:hover .time-display::before {
-  border-bottom: 10px solid #ea333d;
-}
-
 .time-display {
   position: absolute;
   top: 25px;
@@ -233,4 +209,11 @@ input[type="number"]::-webkit-outer-spin-button {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-bottom: 10px solid var(--dot-color);
+}
+.progress-dot:hover,
+.progress-dot:hover .time-display {
+  background-color: #ea333d;
+}
+.progress-dot:hover .time-display::before {
+  border-bottom: 10px solid #ea333d;
 }
