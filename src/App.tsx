@@ -1,25 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import { formatTime } from "../utils/formatTime";
 import RepeatButton from "./repeatButton/RepeatButton";
 import Container from "./container/Container";
 import LoopCountDisplay from "./loopCountDisplay/LoopCountDisplay";
 import LoopCountInput from "./loopCountInput/LoopCountInput";
 import LoopRangeInput from "./loopRangeInput/LoopRangeInput";
 import ProgressBar from "./progressBar/ProgressBar";
-const formatTime = (time: number): string => {
-  if (!time || Number.isNaN(time)) {
-    return "0:00";
-  }
-  const hours = Math.floor(time / 3600);
-  const minutes = Math.floor((time % 3600) / 60);
-  const seconds = Math.floor(time % 60);
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  } else {
-    return `${minutes}:${seconds.toString().padStart(2, "0")} `;
-  }
-};
 
 type AppProps = { videoId: string; duration: number; isDark: boolean };
 export type BaseState = {
