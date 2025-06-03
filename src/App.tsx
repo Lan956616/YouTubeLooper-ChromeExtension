@@ -1,4 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
+import RepeatButton from "./repeatButton/RepeatButton";
+import Container from "./container/Container";
+import LoopCountDisplay from "./loopCountDisplay/LoopCountDisplay";
+import LoopCountInput from "./loopCountInput/LoopCountInput";
+import LoopRangeInput from "./loopRangeInput/LoopRangeInput";
+import ProgressBar from "./progressBar/ProgressBar";
 const formatTime = (time: number): string => {
   if (!time || Number.isNaN(time)) {
     return "0:00";
@@ -16,7 +22,7 @@ const formatTime = (time: number): string => {
 };
 
 type AppProps = { videoId: string; duration: number; isDark: boolean };
-type BaseState = {
+export type BaseState = {
   time: string;
   input: string;
   position: number;
@@ -44,12 +50,6 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     position: 100,
   });
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (["Escape", "Enter"].includes(event.key)) {
-      //有問題
-      event.currentTarget.blur();
-    }
-  };
   const maxLoopControl = {
     prevMaxLoop: useRef<number>(10),
     handleChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -296,120 +296,44 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
   ]);
   return (
     <div className="app-component">
-      <div
-        className={`repeat-button ${isLoop ? "active" : ""} `}
-        onClick={handleButtonClick}
-      >
-        {!isLoop && (
-          <img
-            src={chrome.runtime.getURL("pictures/loop.png")}
-            alt="loop Icon"
-          />
-        )}
-        {isLoop && (
-          <img
-            src={chrome.runtime.getURL("pictures/yellow-loop.png")}
-            alt="yellow Loop Icon"
-          />
-        )}
-      </div>
-      <div className={`container ${isDark ? "darkmode" : ""} `}>
-        <div className="time-count-zone row">
-          已播放<span>{loopCount}</span>次
-        </div>
-
-        <div className="limited-zone row">
-          <div
-            className={`switch-container ${isLimitTimed ? "active" : ""} `}
-            onClick={() => {
-              setIsLimitTimed(!isLimitTimed);
-            }}
-          >
-            <div className="switch-toggle"></div>
-          </div>
-
-          <div className="setting-area">
-            循環播放
-            <input
-              type="number"
-              className="inputStyle limited"
-              value={maxLoopCount}
-              onChange={maxLoopControl.handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={maxLoopControl.onBlur}
-              onFocus={(event) => event.currentTarget.select()}
-              onDoubleClick={(event) => event.currentTarget.select()}
-            />
-            次
-          </div>
-        </div>
-        <div className="limited-zone row">
-          <div
-            className={`switch-container ${isLimitZoned ? "active" : ""} `}
-            onClick={() => {
-              setIsLimitZoned(!isLimitZoned);
-            }}
-          >
-            <div className="switch-toggle"></div>
-          </div>
-          <div className="setting-area">
-            在
-            <input
-              type="text"
-              className="inputStyle"
-              value={startState.input}
-              onChange={startTimeControl.handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={startTimeControl.onBlur}
-              onFocus={(event) => event.target.select()}
-              onDoubleClick={(event) => event.currentTarget.select()}
-            />
-            -
-            <input
-              type="text"
-              className="inputStyle"
-              value={endState.input}
-              onChange={endTimeControl.handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={endTimeControl.onBlur}
-              onFocus={(event) => event.target.select()}
-              onDoubleClick={(event) => event.currentTarget.select()}
-            />
-            間循環播放
-          </div>
-        </div>
-        <div className="progress-bar" ref={progressBarRef}>
-          <div
-            className={`limited-progress-bar ${isLimitZoned ? "active" : ""} `}
-            style={{
-              left: `${startState.position}% `,
-              right: `${100 - endState.position}% `,
-            }}
-          ></div>
-          <div
-            className={`progress-dot ${isDraggingLeft ? "active" : ""} `}
-            style={{
-              left: `${startState.position}% `,
-            }}
-            onMouseDown={() => {
-              dragControl.handleMouseDown("left");
-            }}
-          >
-            <div className="time-display">{startState.time}</div>
-          </div>
-          <div
-            className={`progress-dot ${isDraggingRight ? "active" : ""} `}
-            style={{
-              left: `${endState.position}% `,
-            }}
-            onMouseDown={() => {
-              dragControl.handleMouseDown("right");
-            }}
-          >
-            <div className="time-display">{endState.time}</div>
-          </div>
-        </div>
-      </div>
+      <RepeatButton isLoop={isLoop} onClick={handleButtonClick} />
+      <Container isDark={isDark}>
+        <LoopCountDisplay loopCount={loopCount} />
+        <LoopCountInput
+          isActive={isLimitTimed}
+          onToggle={() => {
+            setIsLimitTimed(!isLimitTimed);
+          }}
+          maxLoopCount={maxLoopCount}
+          onChange={maxLoopControl.handleChange}
+          onBlur={maxLoopControl.onBlur}
+        />
+        <LoopRangeInput
+          isActive={isLimitZoned}
+          onToggle={() => {
+            setIsLimitZoned(!isLimitZoned);
+          }}
+          startInput={{
+            value: startState.input,
+            onChange: startTimeControl.handleChange,
+            onBlur: startTimeControl.onBlur,
+          }}
+          endInput={{
+            value: endState.input,
+            onChange: endTimeControl.handleChange,
+            onBlur: endTimeControl.onBlur,
+          }}
+        />
+        <ProgressBar
+          isActive={isLimitZoned}
+          progressBarRef={progressBarRef}
+          startState={startState}
+          endState={endState}
+          onMouseDown={dragControl.handleMouseDown}
+          isDraggingLeft={isDraggingLeft}
+          isDraggingRight={isDraggingRight}
+        />
+      </Container>
     </div>
   );
 };
