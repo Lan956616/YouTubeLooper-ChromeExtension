@@ -3,11 +3,11 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
-    content: "./src/index.tsx", //入口
+    content: "./src/index.ts",
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].js", // 會輸出成 dist/content.js
+    filename: "[name].js",
   },
   mode: "production",
   watch: true,
