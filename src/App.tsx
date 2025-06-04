@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatTime } from "../utils/formatTime";
 import RepeatButton from "./repeatButton/RepeatButton";
 import Container from "./container/Container";
@@ -7,14 +7,8 @@ import LoopCountInput from "./loopCountInput/LoopCountInput";
 import LoopRangeInput from "./loopRangeInput/LoopRangeInput";
 import ProgressBar from "./progressBar/ProgressBar";
 import { useLoopControl } from "../hooks/useLoopControl";
-
+import { useTimeInputControl } from "../hooks/useTimeInputControl";
 type AppProps = { videoId: string; duration: number; isDark: boolean };
-
-export type BaseState = {
-  time: string;
-  input: string;
-  position: number;
-};
 
 const App = ({ videoId, duration, isDark }: AppProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -23,16 +17,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
   const [isLimitZoned, setIsLimitZoned] = useState<boolean>(false);
   const [isDraggingLeft, setIsDraggingLeft] = useState<boolean>(false);
   const [isDraggingRight, setIsDraggingRight] = useState<boolean>(false);
-  const [startState, setStartState] = useState<BaseState>({
-    time: "0:00",
-    input: "0:00",
-    position: 0,
-  });
-  const [endState, setEndState] = useState<BaseState>({
-    time: "0:00",
-    input: "0:00",
-    position: 100,
-  });
+
   const {
     isLoop,
     setIsLoop,
@@ -47,64 +32,20 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     toggleLoop,
     prevMaxLoop,
   } = useLoopControl();
-  const startTimeControl = {
-    prevStartTime: useRef<number>(0),
-    handleChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-      setStartState((prev) => {
-        return { ...prev, input: event.target.value };
-      });
-    },
-    onBlur: () => {
-      if (
-        startState.input === formatTime(startTimeControl.prevStartTime.current)
-      ) {
-        return;
-      }
-      const parsedValue: number = Number(startState.input);
-      let value: number =
-        isNaN(parsedValue) || startState.input === ""
-          ? startTimeControl.prevStartTime.current
-          : parsedValue;
-      const startTimeMax: number =
-        endTimeControl.prevEndTime.current - duration * 0.03;
-      value = Math.min(Math.max(value, 0), startTimeMax);
-      startTimeControl.prevStartTime.current = value;
-      setStartState({
-        input: formatTime(value),
-        time: formatTime(value),
-        position: (value / duration) * 100,
-      });
-      setIsLimitZoned(true);
-    },
-  };
-  const endTimeControl = {
-    prevEndTime: useRef<number>(duration),
-    handleChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-      setEndState((prev) => {
-        return { ...prev, input: event.target.value };
-      });
-    },
-    onBlur: () => {
-      if (endState.input === formatTime(endTimeControl.prevEndTime.current)) {
-        return;
-      }
-      const parsedValue: number = Number(endState.input);
-      let value: number =
-        isNaN(parsedValue) || endState.input === ""
-          ? endTimeControl.prevEndTime.current
-          : parsedValue;
-      const endTimeMin: number =
-        startTimeControl.prevStartTime.current + duration * 0.03;
-      value = Math.max(Math.min(value, duration), endTimeMin);
-      endTimeControl.prevEndTime.current = value;
-      setEndState({
-        input: formatTime(value),
-        time: formatTime(value),
-        position: (value / duration) * 100,
-      });
-      setIsLimitZoned(true);
-    },
-  };
+  const startControl = useTimeInputControl(
+    0,
+    duration,
+    true,
+    () => endControl.prevTimeRef.current,
+    setIsLimitZoned
+  );
+  const endControl = useTimeInputControl(
+    duration,
+    duration,
+    false,
+    () => startControl.prevTimeRef.current,
+    setIsLimitZoned
+  );
   const dragControl = {
     handleMouseDown: (side: string) => {
       if (isDraggingRight || isDraggingLeft) {
@@ -129,18 +70,18 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     setIsLimitTimed(false);
     setIsLimitZoned(false);
     //初始化入＋出點時間
-    setStartState({
+    startControl.setTimeState({
       time: "0:00",
       input: "0:00",
       position: 0,
     });
-    setEndState({
+    endControl.setTimeState({
       time: formatTime(duration),
       input: formatTime(duration),
       position: 100,
     });
-    startTimeControl.prevStartTime.current = 0;
-    endTimeControl.prevEndTime.current = duration;
+    startControl.prevTimeRef.current = 0;
+    endControl.prevTimeRef.current = duration;
     //初始化已播放次數
     setLoopCount(0);
     //初始化限定播放次數
@@ -171,8 +112,8 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
       if (!isLoop || isJumpingRef.current || !videoRef.current) {
         return;
       }
-      const userStartTime = startTimeControl.prevStartTime.current;
-      const userEndTime = endTimeControl.prevEndTime.current;
+      const userStartTime = startControl.prevTimeRef.current;
+      const userEndTime = endControl.prevTimeRef.current;
       const userLimitTime = prevMaxLoop.current;
       const currentTime = videoRef.current.currentTime;
       //開啟 區間播放模式 或 限定次數＋區間模式 時
@@ -229,19 +170,19 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
         100
       );
       const newPercentage = isDraggingLeft
-        ? Math.min(percentage, endState.position - 3)
-        : Math.max(percentage, startState.position + 3);
+        ? Math.min(percentage, endControl.timeState.position - 3)
+        : Math.max(percentage, startControl.timeState.position + 3);
       const newTime = (newPercentage / 100) * duration;
       if (isDraggingLeft) {
-        startTimeControl.prevStartTime.current = newTime;
-        setStartState({
+        startControl.prevTimeRef.current = newTime;
+        startControl.setTimeState({
           time: formatTime(newTime),
           input: formatTime(newTime),
           position: newPercentage,
         });
       } else if (isDraggingRight) {
-        endTimeControl.prevEndTime.current = newTime;
-        setEndState({
+        endControl.prevTimeRef.current = newTime;
+        endControl.setTimeState({
           time: formatTime(newTime),
           input: formatTime(newTime),
           position: newPercentage,
@@ -256,8 +197,8 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     };
   }, [
     duration,
-    startState.position,
-    endState.position,
+    startControl.timeState.position,
+    endControl.timeState.position,
     isDraggingLeft,
     isDraggingRight,
   ]);
@@ -281,21 +222,21 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
             setIsLimitZoned(!isLimitZoned);
           }}
           startInput={{
-            value: startState.input,
-            onChange: startTimeControl.handleChange,
-            onBlur: startTimeControl.onBlur,
+            value: startControl.timeState.input,
+            onChange: startControl.handleChange,
+            onBlur: startControl.onBlur,
           }}
           endInput={{
-            value: endState.input,
-            onChange: endTimeControl.handleChange,
-            onBlur: endTimeControl.onBlur,
+            value: endControl.timeState.input,
+            onChange: endControl.handleChange,
+            onBlur: endControl.onBlur,
           }}
         />
         <ProgressBar
           isActive={isLimitZoned}
           progressBarRef={progressBarRef}
-          startState={startState}
-          endState={endState}
+          startState={startControl.timeState}
+          endState={endControl.timeState}
           onMouseDown={dragControl.handleMouseDown}
           isDraggingLeft={isDraggingLeft}
           isDraggingRight={isDraggingRight}
