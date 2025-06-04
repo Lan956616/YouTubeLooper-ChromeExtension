@@ -5,13 +5,20 @@ type BaseState = {
   input: string;
   position: number;
 };
+export type TimeControlType = {
+  prevTimeRef: React.RefObject<number>;
+  timeState: BaseState;
+  setTimeState: React.Dispatch<React.SetStateAction<BaseState>>;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void;
+};
 export const useTimeInputControl = (
   initialTime: number,
   duration: number,
   isStart: boolean,
   getOtherTime: () => number,
   setIsLimitZoned: React.Dispatch<React.SetStateAction<boolean>>
-) => {
+): TimeControlType => {
   const prevTimeRef = useRef<number>(initialTime);
   const [timeState, setTimeState] = useState<BaseState>({
     input: formatTime(initialTime),
