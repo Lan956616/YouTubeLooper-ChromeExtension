@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { formatTime } from "../utils/formatTime";
-type BaseState = {
+export type BaseState = {
   time: string;
   input: string;
   position: number;

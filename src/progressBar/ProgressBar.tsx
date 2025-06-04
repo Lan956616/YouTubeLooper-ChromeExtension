@@ -1,4 +1,4 @@
-import type { BaseState } from "@/App";
+import type { BaseState } from "../../hooks/useTimeInputControl";
 
 type ProgressBarProps = {
   progressBarRef: React.RefObject<HTMLDivElement | null>;
