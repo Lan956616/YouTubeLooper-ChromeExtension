@@ -9,13 +9,16 @@ import ProgressBar from "./progressBar/ProgressBar";
 import { useLoopControl } from "../hooks/useLoopControl";
 import { useTimeInputControl } from "../hooks/useTimeInputControl";
 import { useDragControl } from "../hooks/useDragControl";
+import { useVideoWatcher } from "../hooks/useVideoWatcher";
 type AppProps = { videoId: string; duration: number; isDark: boolean };
 const App = ({ videoId, duration, isDark }: AppProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
-  const isJumpingRef = useRef<boolean>(false);
   const [isLimitZoned, setIsLimitZoned] = useState<boolean>(false);
-
+  //1.組件初次渲染時 找到影片更新ref值
+  useEffect(() => {
+    videoRef.current = document.querySelector(".html5-video-container video");
+  }, []);
   const {
     isLoop,
     setIsLoop,
@@ -50,11 +53,18 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     startControl,
     endControl
   );
+  useVideoWatcher(
+    videoRef,
+    duration,
+    isLoop,
+    isLimitZoned,
+    isLimitTimed,
+    startControl,
+    endControl,
+    prevMaxLoop,
+    setLoopCount
+  );
 
-  //1.組件初次渲染時 找到影片更新ref值
-  useEffect(() => {
-    videoRef.current = document.querySelector(".html5-video-container video");
-  }, []);
   //2.當影片改變時
   useEffect(() => {
     //關閉所有循環功能
@@ -80,67 +90,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     setMaxLoopCount(10);
     prevMaxLoop.current = 10;
   }, [videoId]);
-  //3.根據循環模式監聽影片播放
-  useEffect(() => {
-    if (!videoRef.current) {
-      return;
-    }
-    const resetVideo = (newTime: number, shouldPlay: boolean) => {
-      if (videoRef.current === null) {
-        return;
-      }
-      isJumpingRef.current = true;
-      videoRef.current.pause();
-      videoRef.current.currentTime = newTime;
-      setTimeout(() => {
-        isJumpingRef.current = false;
-        if (shouldPlay && videoRef.current) {
-          videoRef.current.play();
-        }
-      }, 250);
-    };
-    const handleTimeUpdate = () => {
-      //若 循環按鈕沒被按開 或 影片正在跳轉時間時return
-      if (!isLoop || isJumpingRef.current || !videoRef.current) {
-        return;
-      }
-      const userStartTime = startControl.prevTimeRef.current;
-      const userEndTime = endControl.prevTimeRef.current;
-      const userLimitTime = prevMaxLoop.current;
-      const currentTime = videoRef.current.currentTime;
-      //開啟 區間播放模式 或 限定次數＋區間模式 時
-      if (isLimitZoned) {
-        if (currentTime < userStartTime) {
-          resetVideo(userStartTime, true);
-          return;
-        }
-        if (currentTime >= userEndTime - 0.5) {
-          setLoopCount((prev) => {
-            const shouldContinue = !isLimitTimed || prev + 1 < userLimitTime;
-            resetVideo(userStartTime, shouldContinue);
-            return prev + 1;
-          });
-          return;
-        }
-      }
-      //開啟無限循環模式 或 限定次數循環模式 時
-      if (!isLimitZoned && currentTime >= duration - 0.5) {
-        setLoopCount((prev) => {
-          const shouldContinue = !isLimitTimed || prev + 1 < userLimitTime;
-          resetVideo(0, shouldContinue);
-          return prev + 1;
-        });
-        return;
-      }
-    };
-    videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
-    return () => {
-      if (!videoRef.current) {
-        return;
-      }
-      videoRef.current.removeEventListener("timeupdate", handleTimeUpdate);
-    };
-  }, [isLoop, isLimitTimed, isLimitZoned, duration]);
+
   return (
     <div className="app-component">
       <RepeatButton isLoop={isLoop} onClick={toggleLoop} />
