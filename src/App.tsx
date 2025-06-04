@@ -8,15 +8,13 @@ import LoopRangeInput from "./loopRangeInput/LoopRangeInput";
 import ProgressBar from "./progressBar/ProgressBar";
 import { useLoopControl } from "../hooks/useLoopControl";
 import { useTimeInputControl } from "../hooks/useTimeInputControl";
+import { useDragControl } from "../hooks/useDragControl";
 type AppProps = { videoId: string; duration: number; isDark: boolean };
-
 const App = ({ videoId, duration, isDark }: AppProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const isJumpingRef = useRef<boolean>(false);
   const [isLimitZoned, setIsLimitZoned] = useState<boolean>(false);
-  const [isDraggingLeft, setIsDraggingLeft] = useState<boolean>(false);
-  const [isDraggingRight, setIsDraggingRight] = useState<boolean>(false);
 
   const {
     isLoop,
@@ -46,18 +44,12 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     () => startControl.prevTimeRef.current,
     setIsLimitZoned
   );
-  const dragControl = {
-    handleMouseDown: (side: string) => {
-      if (isDraggingRight || isDraggingLeft) {
-        return;
-      }
-      if (side === "left") {
-        setIsDraggingLeft(true);
-      } else if (side === "right") {
-        setIsDraggingRight(true);
-      }
-    },
-  };
+  const { handleMouseDown, isDraggingLeft, isDraggingRight } = useDragControl(
+    duration,
+    progressBarRef,
+    startControl,
+    endControl
+  );
 
   //1.組件初次渲染時 找到影片更新ref值
   useEffect(() => {
@@ -149,59 +141,6 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
       videoRef.current.removeEventListener("timeupdate", handleTimeUpdate);
     };
   }, [isLoop, isLimitTimed, isLimitZoned, duration]);
-  //4.拉桿滑動功能
-  const handleMouseUp = () => {
-    setIsDraggingLeft(false);
-    setIsDraggingRight(false);
-  };
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!isDraggingLeft && !isDraggingRight) {
-        return;
-      }
-      const progressBar = progressBarRef.current;
-      if (!progressBar) {
-        return;
-      }
-      const rect = progressBar.getBoundingClientRect();
-      const offsetX = event.clientX - rect.left;
-      const percentage = Math.min(
-        Math.max((offsetX / rect.width) * 100, 0),
-        100
-      );
-      const newPercentage = isDraggingLeft
-        ? Math.min(percentage, endControl.timeState.position - 3)
-        : Math.max(percentage, startControl.timeState.position + 3);
-      const newTime = (newPercentage / 100) * duration;
-      if (isDraggingLeft) {
-        startControl.prevTimeRef.current = newTime;
-        startControl.setTimeState({
-          time: formatTime(newTime),
-          input: formatTime(newTime),
-          position: newPercentage,
-        });
-      } else if (isDraggingRight) {
-        endControl.prevTimeRef.current = newTime;
-        endControl.setTimeState({
-          time: formatTime(newTime),
-          input: formatTime(newTime),
-          position: newPercentage,
-        });
-      }
-    };
-    document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [
-    duration,
-    startControl.timeState.position,
-    endControl.timeState.position,
-    isDraggingLeft,
-    isDraggingRight,
-  ]);
   return (
     <div className="app-component">
       <RepeatButton isLoop={isLoop} onClick={toggleLoop} />
@@ -237,7 +176,7 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
           progressBarRef={progressBarRef}
           startState={startControl.timeState}
           endState={endControl.timeState}
-          onMouseDown={dragControl.handleMouseDown}
+          onMouseDown={handleMouseDown}
           isDraggingLeft={isDraggingLeft}
           isDraggingRight={isDraggingRight}
         />
