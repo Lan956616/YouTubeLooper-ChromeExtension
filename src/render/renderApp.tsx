@@ -5,6 +5,7 @@ import { isVideoLive } from "../../utils/isVideoLive";
 
 let root: Root | null = null;
 let waitForVideo: NodeJS.Timeout | null = null;
+let lastVideoId: string | null = null;
 
 export const renderApp = (addingzone: HTMLElement) => {
   // Clear any existing polling timer
@@ -34,12 +35,16 @@ export const renderApp = (addingzone: HTMLElement) => {
       }
       return;
     }
-    let isDarkTheme = document.documentElement.hasAttribute("dark");
-    if (!root) {
-      root = createRoot(addingzone);
+    if (lastVideoId !== null && videoId !== lastVideoId) {
+      video.currentTime = 0;
     }
-    root.render(
-      <App videoId={videoId} duration={video.duration} isDark={isDarkTheme} />
-    );
+    lastVideoId = videoId;
+    let isDarkTheme = document.documentElement.hasAttribute("dark");
+    if (root) {
+      root.unmount();
+      root = null;
+    }
+    root = createRoot(addingzone);
+    root.render(<App duration={video.duration} isDark={isDarkTheme} />);
   }, 500);
 };

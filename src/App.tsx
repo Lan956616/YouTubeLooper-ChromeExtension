@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { formatTime } from "../utils/formatTime";
 import RepeatButton from "./repeatButton/RepeatButton";
 import Container from "./container/Container";
 import LoopCountDisplay from "./loopCountDisplay/LoopCountDisplay";
@@ -10,9 +9,8 @@ import { useLoopControl } from "../hooks/useLoopControl";
 import { useTimeInputControl } from "../hooks/useTimeInputControl";
 import { useDragControl } from "../hooks/useDragControl";
 import { useVideoWatcher } from "../hooks/useVideoWatcher";
-import { useVideoReset } from "../hooks/useVideoReset";
-type AppProps = { videoId: string; duration: number; isDark: boolean };
-const App = ({ videoId, duration, isDark }: AppProps) => {
+type AppProps = { duration: number; isDark: boolean };
+const App = ({ duration, isDark }: AppProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const [isLimitZoned, setIsLimitZoned] = useState<boolean>(false);
@@ -23,13 +21,11 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
   }, []);
   const {
     isLoop,
-    setIsLoop,
     loopCount,
     setLoopCount,
     isLimitTimed,
     setIsLimitTimed,
     maxLoopCount,
-    setMaxLoopCount,
     handleMaxLoopChange,
     handleMaxLoopBlur,
     toggleLoop,
@@ -49,18 +45,6 @@ const App = ({ videoId, duration, isDark }: AppProps) => {
     () => startControl.prevTimeRef.current,
     setIsLimitZoned
   );
-  useVideoReset({
-    videoId,
-    duration,
-    setIsLoop,
-    setIsLimitTimed,
-    setIsLimitZoned,
-    startControl,
-    endControl,
-    setLoopCount,
-    setMaxLoopCount,
-    prevMaxLoop,
-  });
   const { handleMouseDown, isDraggingLeft, isDraggingRight } = useDragControl(
     duration,
     progressBarRef,
