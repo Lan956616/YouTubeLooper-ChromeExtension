@@ -7,13 +7,12 @@ let root: Root | null = null;
 let waitForVideo: NodeJS.Timeout | null = null;
 let lastVideoId: string | null = null;
 
-export const renderApp = (addingzone: HTMLElement) => {
+export const renderApp = (addingzone: HTMLElement, targetUrl: string) => {
   // Clear any existing polling timer
   if (waitForVideo !== null) {
     clearInterval(waitForVideo);
     waitForVideo = null;
   }
-
   waitForVideo = setInterval(() => {
     const video = document.querySelector(
       ".html5-video-container video"
@@ -26,6 +25,9 @@ export const renderApp = (addingzone: HTMLElement) => {
     if (waitForVideo !== null) {
       clearInterval(waitForVideo);
       waitForVideo = null;
+    }
+    if (location.href !== targetUrl) {
+      return;
     }
     // If it's a live video, unmount the React app and skip rendering
     if (isVideoLive()) {
