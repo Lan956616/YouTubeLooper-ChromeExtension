@@ -26,6 +26,7 @@ export const renderApp = (addingzone: HTMLElement, targetUrl: string) => {
       clearInterval(waitForVideo);
       waitForVideo = null;
     }
+    // Skip rendering if the URL has changed
     if (location.href !== targetUrl) {
       return;
     }

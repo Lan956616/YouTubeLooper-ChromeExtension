@@ -2,18 +2,12 @@ import { renderApp } from "./render/renderApp";
 let lastUrl: string = "";
 let isAppMounted = false;
 let waitInterval: NodeJS.Timeout | null = null;
-let count: number = 1;
 
 const observer = new MutationObserver(() => {
-  console.log(`第${count}次進入觀察`);
-  count++;
   // Triggered when any element is added/removed under body
   const currentUrl = window.location.href;
   // Skip if URL hasn't changed
-  if (currentUrl === lastUrl) {
-    console.log(`same url`);
-    return;
-  }
+  if (currentUrl === lastUrl) return;
   lastUrl = currentUrl;
   isAppMounted = false;
   waitForTitle(currentUrl);
@@ -33,8 +27,8 @@ const waitForTitle = (targetUrl: string) => {
   let retries = 0;
   const maxRetries = 20;
   waitInterval = setInterval(() => {
+    // URL has changed — user navigated away, cancel the waiting process
     if (window.location.href !== targetUrl) {
-      console.log("網址變了，中止等待");
       clearInterval(waitInterval!);
       waitInterval = null;
       return;
@@ -44,7 +38,6 @@ const waitForTitle = (targetUrl: string) => {
     if (!titleElement) {
       retries++;
       if (retries > maxRetries) {
-        console.log("超過重試次數，放棄等待");
         clearInterval(waitInterval!);
         waitInterval = null;
       }
@@ -57,6 +50,7 @@ const waitForTitle = (targetUrl: string) => {
 };
 
 const checkAddingZone = (titleElement: Element, targetUrl: string) => {
+  // Skip rendering if the URL has changed or the app is already mounted
   if (window.location.href !== targetUrl || isAppMounted) return;
   let addingZone = document.querySelector("#adding-zone") as HTMLElement | null;
   if (!addingZone) {
