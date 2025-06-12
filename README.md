@@ -39,7 +39,7 @@
 [(back to top)](#table-of-contents)
 
 ### From Chrome Web Store  
-<a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/youtube-looper循環播放/ajbdeccchpbndogiggmhghlhfngbfbih?pli=1"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>
+<a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/youtube-looper%E5%BE%AA%E7%92%B0%E6%92%AD%E6%94%BE/kbddeemhebhmmhejmbdfjjphepfhoobe?authuser=0&hl=zh-TW"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>
 
 ### Manual Installation
 1. [Download the ZIP](https://github.com/Lan956616/YouTubeLooper-ChromeExtension/archive/refs/heads/main.zip) extract it. Locate the `dist` folder.
